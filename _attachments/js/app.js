@@ -34,7 +34,7 @@
 
   // Show the current list of todos by reading them from the database
   function showTodos() {
-    db.allDocs({include_docs: true, descending: true}, function(err, doc) {
+    db.allDocs({include_docs: true, descending: true, startkey: "_"}, function(err, doc) {
       redrawTodosUI(doc.rows);
     });
   }
@@ -64,13 +64,11 @@
   // Initialise a sync with the remote server
   function sync() {
     syncDom.setAttribute('data-sync-state', 'syncing');
-    var opts = {live: true};
-    db.replicate.to(remoteCouch, opts, syncError);
-    db.replicate.from(remoteCouch, opts, syncError);
+    var opts = {live: true, retry: true};
+    db.sync(remoteCouch, opts);
   }
 
-  // EDITING STARTS HERE (you dont need to edit anything below this line)
-
+  // TODO: catch errors
   // There was some form or error syncing
   function syncError() {
     syncDom.setAttribute('data-sync-state', 'error');
